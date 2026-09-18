@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚛️ ESCAPE ROOM FISICA - Liceo Scientifico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);
+            color: #00ff88;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 255, 136, 0.5), inset 0 0 30px rgba(0, 255, 136, 0.2);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88, 0 0 20px #0088ff;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            animation: glitch 2s ease-in-out infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 10px #00ff88, 0 0 20px #0088ff; }
+            50% { text-shadow: 0 0 20px #00ff88, 0 0 30px #0088ff, 0 0 40px #ff00ff; }
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #0088ff;
+            margin-top: 5px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .timer {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.3em;
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .timer.critical {
+            animation: criticalPulse 0.5s ease-in-out infinite;
+            color: #ff00ff;
+        }
+
+        @keyframes criticalPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: rgba(0, 136, 255, 0.2);
+            border: 1px solid #0088ff;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #0088ff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .level-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+
+        .level-1 { border-color: #00ff88; color: #00ff88; }
+        .level-2 { border-color: #0088ff; color: #0088ff; }
+        .level-3 { border-color: #ff00ff; color: #ff00ff; }
+        .level-4 { border-color: #ffaa00; color: #ffaa00; }
+
+        .question-container {
+            margin-top: 30px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            font-size: 0.9em;
+            color: #0088ff;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #00ff88;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #0088ff;
+            border-radius: 5px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        input[type="text"].correct {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        }
+
+        input[type="text"].error {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ff88, #0088ff);
+            border: none;
+            border-radius: 5px;
+            color: #0a0e27;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 1em;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .feedback.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .feedback.error {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .victory-screen {
+            text-align: center;
+            animation: victoryEntry 0.5s ease-out;
+        }
+
+        @keyframes victoryEntry {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .victory-emoji {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .victory-title {
+            font-size: 2em;
+            color: #00ff88;
+            text-shadow: 0 0 15px #00ff88, 0 0 30px #ffaa00;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .victory-message {
+            font-size: 1.2em;
+            color: #0088ff;
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        .stats-final {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .title {
+                font-size: 1.8em;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stat {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">⚛️ ESCAPE ROOM FISICA</div>
+            <div class="subtitle">Supera i 4 livelli per scoprire il codice finale!</div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <span>⏱️ TEMPO:</span>
+                <div class="timer" id="timer">45:00</div>
+            </div>
+            <div class="stat" id="levelIndicator">
+                <span class="level-indicator level-1">LIVELLO 1: Grandezze e Misure</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>AVANZAMENTO</span>
+                <span id="progressText">0/20</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="question-container" id="gameContainer">
+            <!-- Domande generate dinamicamente -->
+        </div>
+
+        <div class="victory-screen hidden" id="victoryScreen">
+            <div class="victory-emoji">🎓🎉</div>
+            <div class="victory-title">MISSIONE COMPIUTA!</div>
+            <div class="victory-message">
+                Complimenti, brillante fisico! 🌟<br>
+                Hai completato l'escape room con successo!<br>
+                Il codice della fisica è ormai in tuo possesso.
+            </div>
+            <div class="stats-final" id="finalStats"></div>
+        </div>
+    </div>
+
+    <script>
+        // Database delle domande
+        const questions = [
+            // Livello 1: Grandezze, Misure e Vettori
+            {
+                level: 1,
+                number: 1,
+                text: "Unità di misura SI della temperatura termodinamica?",
+                answer: "kelvin"
+            },
+            {
+                level: 1,
+                number: 2,
+                text: "Converti 72 km/h in m/s:",
+                answer: "20"
+            },
+            {
+                level: 1,
+                number: 3,
+                text: "Modulo di un vettore con Fx = 3 N e Fy = 4 N?",
+                answer: "5"
+            },
+            {
+                level: 1,
+                number: 4,
+                text: "Quante cifre significative ha il numero 0,00450 kg?",
+                answer: "3"
+            },
+            {
+                level: 1,
+                number: 5,
+                text: "Forza risultante di due forze perpendicolari di 6 N e 8 N?",
+                answer: "10"
+            },
+            // Livello 2: Cinematica
+            {
+                level: 2,
+                number: 6,
+                text: "Un carrello percorre 12 metri in 3 secondi. Velocità in m/s?",
+                answer: "4"
+            },
+            {
+                level: 2,
+                number: 7,
+                text: "Spazio percorso da un corpo da fermo con a = 2 m/s² per t = 4 s?",
+                answer: "16"
+            },
+            {
+                level: 2,
+                number: 8,
+                text: "Velocità di impatto di un grave in caduta per t = 3 s (g = 10 m/s²)?",
+                answer: "30"
+            },
+            {
+                level: 2,
+                number: 9,
+                text: "Nel grafico spazio-tempo di un MRU, cosa rappresenta la pendenza?",
+                answer: "velocita"
+            },
+            {
+                level: 2,
+                number: 10,
+                text: "Modulo dell'accelerazione di un ciclista che frena da 10 m/s a 0 in 5 s?",
+                answer: "2"
+            },
+            // Livello 3: Dinamica
+            {
+                level: 3,
+                number: 11,
+                text: "Accelerazione impressa da una forza di 20 N su un corpo di 4 kg?",
+                answer: "5"
+            },
+            {
+                level: 3,
+                number: 12,
+                text: "Peso sulla Terra di una massa di 5 kg (g = 10 m/s²)?",
+                answer: "50"
+            },
+            {
+                level: 3,
+                number: 13,
+                text: "Fattore di cambio dell'accelerazione se raddoppia la forza a parità di massa?",
+                answer: "2"
+            },
+            {
+                level: 3,
+                number: 14,
+                text: "Accelerazione di un sistema di masse m₁ = 2 kg e m₂ = 3 kg spinti da 10 N?",
+                answer: "2"
+            },
+            {
+                level: 3,
+                number: 15,
+                text: "Numero del principio della dinamica che descrive l'inerzia?",
+                answer: "1"
+            },
+            // Livello 4: Energia e Finale
+            {
+                level: 4,
+                number: 16,
+                text: "Variazione di energia potenziale di un blocco di 2 kg sollevato a 5 m (g = 10 m/s²)?",
+                answer: "100"
+            },
+            {
+                level: 4,
+                number: 17,
+                text: "Energia cinetica di un'auto di 1000 kg a 10 m/s?",
+                answer: "50000"
+            },
+            {
+                level: 4,
+                number: 18,
+                text: "Potenza sviluppata da un lavoro di 200 J in 4 secondi?",
+                answer: "50"
+            },
+            {
+                level: 4,
+                number: 19,
+                text: "Chi ha formulato le tre leggi della dinamica?",
+                answer: "newton"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let startTime = Date.now();
+        let timeRemaining = 45 * 60; // 45 minuti in secondi
+        let answers = {};
+
+        const levelNames = {
+            1: "Grandezze e Misure",
+            2: "Cinematica",
+            3: "Dinamica",
+            4: "Energia e Finale"
+        };
+
+        function initGame() {
+            renderQuestion();
+            startTimer();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('gameContainer');
+            const q = questions[currentQuestionIndex];
+            
+            const levelClass = `level-${q.level}`;
+            
+            container.innerHTML = `
+                <div class="question-number">
+                    DOMANDA ${q.number}/20 | LIVELLO ${q.level}: ${levelNames[q.level]}
+                </div>
+                <div class="question-text">${q.text}</div>
+                <div class="input-group">
+                    <input type="text" id="answerInput" placeholder="Digita la risposta..." autocomplete="off">
+                    <button onclick="checkAnswer()">INVIA</button>
+                </div>
+                <div id="feedback"></div>
+            `;
+            
+            updateLevelIndicator();
+            updateProgress();
+            
+            // Focus sull'input
+            setTimeout(() => document.getElementById('answerInput').focus(), 100);
+            
+            // Consenti invio con Enter
+            document.getElementById('answerInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            });
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('answerInput');
+            const q = questions[currentQuestionIndex];
+            const userAnswer = input.value.trim().toLowerCase();
+            
+            const feedback = document.getElementById('feedback');
+            
+            if (userAnswer === q.answer) {
+                // Risposta corretta
+                input.classList.remove('error');
+                input.classList.add('correct');
+                feedback.className = 'feedback success';
+                feedback.innerHTML = '✓ RISPOSTA CORRETTA!';
+                
+                answers[currentQuestionIndex] = userAnswer;
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questions.length) {
+                        renderQuestion();
+                    } else {
+                        showVictoryScreen();
+                    }
+                }, 800);
+            } else {
+                // Risposta errata
+                input.classList.remove('correct');
+                input.classList.add('error');
+                feedback.className = 'feedback error';
+                feedback.innerHTML = '✗ RISPOSTA ERRATA - Riprova!';
+                input.value = '';
+                setTimeout(() => input.focus(), 300);
+            }
+        }
+
+        function updateProgress() {
+            const progress = currentQuestionIndex;
+            const percentage = (progress / questions.length) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${progress}/20`;
+        }
+
+        function updateLevelIndicator() {
+            const level = questions[currentQuestionIndex].level;
+            const indicator = document.getElementById('levelIndicator');
+            const levelClass = `level-${level}`;
+            indicator.innerHTML = `<span class="level-indicator ${levelClass}">LIVELLO ${level}: ${levelNames[level]}</span>`;
+        }
+
+        function startTimer() {
+            const timerEl = document.getElementById('timer');
+            
+            setInterval(() => {
+                timeRemaining--;
+                
+                if (timeRemaining < 0) {
+                    timeRemaining = 0;
+                }
+                
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                timerEl.textContent = display;
+                
+                if (timeRemaining < 300) {
+                    timerEl.classList.add('critical');
+                } else {
+                    timerEl.classList.remove('critical');
+                }
+                
+                if (timeRemaining === 0) {
+                    showTimeoutScreen();
+                }
+            }, 1000);
+        }
+
+        function showVictoryScreen() {
+            document.getElementById('gameContainer').classList.add('hidden');
+            const victoryScreen = document.getElementById('victoryScreen');
+            victoryScreen.classList.remove('hidden');
+            
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            
+            const finalStats = document.getElementById('finalStats');
+            finalStats.innerHTML = `
+                <div style="margin: 10px 0;">⏱️ TEMPO IMPIEGATO: ${minutes}:${String(seconds).padStart(2, '0')}</div>
+                <div style="margin: 10px 0;">✓ DOMANDE CORRETTE: 20/20</div>
+                <div style="margin: 10px 0;">⭐ RISULTATO: ECCELLENTE</div>
+            `;
+        }
+
+        function showTimeoutScreen() {
+            document.getElementById('gameContainer').classList.add('hidden');
+            const victoryScreen = document.getElementById('victoryScreen');
+            victoryScreen.classList.remove('hidden');
+            victoryScreen.innerHTML = `
+                <div class="victory-emoji">⏰</div>
+                <div class="victory-title">TEMPO SCADUTO!</div>
+                <div class="victory-message">
+                    La missione non è stata completata in tempo.<br>
+                    Hai risposto correttamente a ${currentQuestionIndex} domande su 20.
+                </div>
+            `;
+        }
+
+        // Avvia il gioco
+        initGame();
+    </script>
+</body>
+</html>
