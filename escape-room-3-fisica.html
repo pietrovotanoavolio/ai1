@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape Room 3 - Fisica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .stanza-info {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin: 30px 0;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f5f5;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-skip {
+            background: #ffc107;
+            color: #333;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-skip:hover {
+            background: #ffb300;
+        }
+
+        .btn-next {
+            background: #28a745;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-next:hover {
+            background: #218838;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .feedback.hint {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .hints-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .hint-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .stanza-complete {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .stanza-complete h2 {
+            color: #28a745;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .final-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .final-message h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .final-code {
+            background: #667eea;
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .bonus-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="content"></div>
+    </div>
+
+    <script>
+        const gameData = {
+            stanze: [
+                {
+                    numero: 1,
+                    nome: "STANZA 1 - FACILE",
+                    descrizione: "Termologia, Unità di misura, Primo Principio, Trasformazioni P-V",
+                    domande: [
+                        {
+                            id: 1,
+                            testo: "Qual è la differenza tra calore e temperatura?",
+                            tipo: "testo",
+                            risposteValide: ["il calore è energia trasferita, la temperatura misura l'agitazione molecolare", "calore è energia, temperatura è una proprietà"],
+                            indizi: null
+                        },
+                        {
+                            id: 2,
+                            testo: "Converti 25°C in Kelvin",
+                            tipo: "numerico",
+                            rispostaCorretta: 298.15,
+                            tolleranza: 0.5,
+                            indizi: null
+                        },
+                        {
+                            id: 3,
+                            testo: "Una trasformazione isobara nel piano P-V è rappresentata da una linea...",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) verticale", "B) orizzontale", "C) diagonale", "D) curva"],
+                            rispostaCorretta: "B",
+                            indizi: null
+                        },
+                        {
+                            id: 4,
+                            testo: "Nel primo principio della termodinamica, ΔU = Q - W, cosa rappresenta W?",
+                            tipo: "testo",
+                            risposteValide: ["il lavoro compiuto dal sistema", "lavoro fatto dal gas", "lavoro"],
+                            indizi: null
+                        },
+                        {
+                            id: 5,
+                            testo: "Quale unità di misura è corretta per l'energia?",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) Pascal", "B) Joule", "C) Watt", "D) Newton"],
+                            rispostaCorretta: "B",
+                            indizi: null
+                        },
+                        {
+                            id: 6,
+                            testo: "Se un gas si espande in una trasformazione adiabatica, la sua temperatura...",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) aumenta", "B) diminuisce", "C) rimane costante", "D) dipende dalla pressione"],
+                            rispostaCorretta: "B",
+                            indizi: null
+                        },
+                        {
+                            id: 7,
+                            testo: "Quanta energia (in Joule) è necessaria per riscaldare 2 kg di acqua di 10°C? (calore specifico acqua = 4186 J/kg·°C)",
+                            tipo: "numerico",
+                            rispostaCorretta: 83720,
+                            tolleranza: 100,
+                            indizi: null
+                        },
+                        {
+                            id: 8,
+                            testo: "BONUS - Onde Stazionarie: In una corda fissa ai due estremi, il numero di ventri in una vibrazione è sempre...",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) uguale al numero di nodi", "B) uno più del numero di nodi", "C) uno meno del numero di nodi", "D) doppio del numero di nodi"],
+                            rispostaCorretta: "C",
+                            indizi: [
+                                "Indizio 1: Pensa ai nodi (punti fermi) e ventri (punti che vibrano)...",
+                                "Indizio 2: Ai due estremi della corda ci sono sempre nodi.",
+                                "Indizio 3: Tra due nodi c'è sempre un ventre. Se conti bene..."
+                            ],
+                            bonus: true
+                        }
+                    ]
+                },
+                {
+                    numero: 2,
+                    nome: "STANZA 2 - MEDIA",
+                    descrizione: "Principi di Newton, Quantità di Moto, Energia, Urti",
+                    domande: [
+                        {
+                            id: 1,
+                            testo: "Enuncia il primo principio di Newton",
+                            tipo: "testo",
+                            risposteValide: ["un corpo a riposo rimane a riposo, in moto rimane in moto se non agisce una forza", "assenza di forze implica velocità costante"],
+                            indizi: ["Indizio 1: Riguarda cosa succede quando NON c'è una forza...", "Indizio 2: Pensa all'inerzia e allo stato di moto/quiete di un corpo."]
+                        },
+                        {
+                            id: 2,
+                            testo: "Una forza di 10 N agisce su una massa di 5 kg. Qual è l'accelerazione?",
+                            tipo: "numerico",
+                            rispostaCorretta: 2,
+                            tolleranza: 0.1,
+                            indizi: ["Indizio 1: Usa F = ma", "Indizio 2: Dividi la forza per la massa"]
+                        },
+                        {
+                            id: 3,
+                            testo: "La quantità di moto è il prodotto di...",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) forza e tempo", "B) massa e velocità", "C) forza e accelerazione", "D) energia e massa"],
+                            rispostaCorretta: "B",
+                            indizi: ["Indizio 1: È una grandezza vettoriale legata al movimento.", "Indizio 2: Si indica con p = m·v"]
+                        },
+                        {
+                            id: 4,
+                            testo: "In un urto elastico tra due palle di massa uguale, dove una è ferma, cosa succede?",
+                            tipo: "testo",
+                            risposteValide: ["la palla in movimento si ferma e l'altra si muove", "si scambiano le velocità"],
+                            indizi: ["Indizio 1: In un urto elastico si conserva sia la quantità di moto che l'energia cinetica.", "Indizio 2: Le masse sono uguali e una è inizialmente ferma..."]
+                        },
+                        {
+                            id: 5,
+                            testo: "Un oggetto di 2 kg si muove a 3 m/s. Qual è la sua quantità di moto?",
+                            tipo: "numerico",
+                            rispostaCorretta: 6,
+                            tolleranza: 0.1,
+                            indizi: ["Indizio 1: p = m·v", "Indizio 2: Moltiplica massa e velocità"]
+                        },
+                        {
+                            id: 6,
+                            testo: "In un urto completamente anelastico, cosa si conserva?",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) solo l'energia cinetica", "B) solo la quantità di moto", "C) sia energia che quantità di moto", "D) nulla"],
+                            rispostaCorretta: "B",
+                            indizi: ["Indizio 1: L'energia NON si conserva in un urto anelastico (parte si trasforma in calore).", "Indizio 2: Ma la quantità di moto sì, in assenza di forze esterne."]
+                        },
+                        {
+                            id: 7,
+                            testo: "Un corpo cade da 5 metri (g = 10 m/s²). Qual è la sua velocità al suolo?",
+                            tipo: "numerico",
+                            rispostaCorretta: 10,
+                            tolleranza: 0.5,
+                            indizi: ["Indizio 1: Usa la conservazione dell'energia: mgh = (1/2)mv²", "Indizio 2: Oppure v² = 2gh", "Indizio 3: v = √(2·10·5)"]
+                        },
+                        {
+                            id: 8,
+                            testo: "Il terzo principio di Newton afferma che...",
+                            tipo: "testo",
+                            risposteValide: ["ad ogni azione corrisponde una reazione uguale e contraria", "le forze si presentano in coppie uguali e opposte"],
+                            indizi: ["Indizio 1: Riguarda l'interazione tra due corpi.", "Indizio 2: Se A esercita una forza su B, allora B esercita una forza su A..."]
+                        }
+                    ]
+                },
+                {
+                    numero: 3,
+                    nome: "STANZA 3 - DIFFICILE",
+                    descrizione: "Fluidostatica, Bernoulli, Continuità, Statica, Leve",
+                    domande: [
+                        {
+                            id: 1,
+                            testo: "Quale formula descrive la pressione in un fluido in equilibrio?",
+                            tipo: "testo",
+                            risposteValide: ["p = ρgh", "pressione uguale densità per gravità per altezza"],
+                            indizi: ["Indizio 1: Riguarda la pressione idrostatica a una certa profondità.", "Indizio 2: Dipende dalla densità del fluido (ρ), dall'accelerazione di gravità (g) e dalla profondità (h).", "Indizio 3: p = ρ·g·h"]
+                        },
+                        {
+                            id: 2,
+                            testo: "Un tubo ha sezione 2 cm² in un punto e 1 cm² in un altro. Se la velocità nel primo tratto è 2 m/s, qual è nel secondo? (Legge di continuità)",
+                            tipo: "numerico",
+                            rispostaCorretta: 4,
+                            tolleranza: 0.1,
+                            indizi: ["Indizio 1: A₁·v₁ = A₂·v₂ (portata costante)", "Indizio 2: 2·2 = 1·v₂", "Indizio 3: v₂ = 4/1"]
+                        },
+                        {
+                            id: 3,
+                            testo: "Nel principio di Bernoulli, quando la velocità del fluido aumenta, la pressione...",
+                            tipo: "sceltaMultipla",
+                            opzioni: ["A) aumenta", "B) diminuisce", "C) rimane costante", "D) dipende dalla densità"],
+                            rispostaCorretta: "B",
+                            indizi: ["Indizio 1: La somma di pressione, energia cinetica e potenziale rimane costante.", "Indizio 2: Se p + (1/2)ρv² + ρgh = costante...", "Indizio 3: Se v² aumenta, allora p deve diminuire."]
+                        },
+                        {
+                            id: 4,
+                            testo: "Una leva di primo genere ha fulcro al centro, braccio resistente 2 m e braccio motore 5 m. Se la resistenza è 100 N, qual è la forza motrice minima?",
+                            tipo: "numerico",
+                            rispostaCorretta: 40,
+                            tolleranza: 1,
+                            indizi: ["Indizio 1: Usa il principio della leva: F_motrice · b_motore = F_resistente · b_resistente", "Indizio 2: F_motrice · 5 = 100 · 2", "Indizio 3: F_motrice = 200/5"]
+                        },
+                        {
+                            id: 5,
+                            testo: "In fluidostatica, il principio di Archimede afferma che...",
+                            tipo: "testo",
+                            risposteValide: ["un corpo immerso in un fluido riceve una spinta verso l'alto pari al peso del fluido spostato", "la forza di galleggiamento uguaglia il peso del volume di fluido spostato"],
+                            indizi: ["Indizio 1: Riguarda la forza che agisce su un corpo immerso.", "Indizio 2: Questa forza dipende dal volume di fluido spostato.", "Indizio 3: F_Archimede = ρ_fluido·g·V_immerso"]
+                        },
+                        {
+                            id: 6,
+                            testo: "Una leva di secondo genere ha il fulcro a un'estremità. La resistenza è applicata a 1 m dal fulcro, la forza motrice a 3 m. Se la resistenza è 60 N, qual è la forza motrice?",
+                            tipo: "numerico",
+                            rispostaCorretta: 20,
+                            tolleranza: 1,
+                            indizi: ["Indizio 1: F_motrice · b_motore = F_resistente · b_resistente", "Indizio 2: F_motrice · 3 = 60 · 1", "Indizio 3: F_motrice = 60/3"]
+                        },
+                        {
+                            id: 7,
+                            testo: "In una condotta orizzontale, il teorema di Bernoulli afferma che p + (1/2)ρv² rimane costante. Se la pressione cala a 5000 Pa e la velocità iniziale era 1 m/s con pressione 6000 Pa, quale sarà la nuova velocità? (ρ = 1000 kg/m³)",
+                            tipo: "numerico",
+                            rispostaCorretta: 1.414,
+                            tolleranza: 0.1,
+                            indizi: ["Indizio 1: 6000 + (1/2)·1000·1² = 5000 + (1/2)·1000·v²", "Indizio 2: 6000 + 500 = 5000 + 500·v²", "Indizio 3: 6500 - 5000 = 500·v² → v² = 1000/500 = 2"]
+                        },
+                        {
+                            id: 8,
+                            testo: "Per l'equilibrio statico di un corpo rigido, quale condizione deve essere soddisfatta?",
+                            tipo: "testo",
+                            risposteValide: ["la somma delle forze e dei momenti deve essere zero", "equilibrio traslazionale e rotazionale", "ΣF = 0 e Στ = 0"],
+                            indizi: ["Indizio 1: Non solo le forze devono bilanciarsi...", "Indizio 2: ...ma anche i momenti (o coppie) attorno a un punto.", "Indizio 3: ΣF = 0 (equilibrio traslazionale) e Σ_momenti = 0 (equilibrio rotazionale)"]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        let statoGioco = {
+            stanzaCorrente: 0,
+            domandaCorrente: 0,
+            risposteCorrette: 0,
+            risposteSbagliate: 0,
+            tentativiAttuali: 0,
+            indicziMostrati: 0,
+            giocoDichiarato: false
+        };
+
+        function inizioGioco() {
+            renderizzaSchermataInizio();
+        }
+
+        function renderizzaSchermataInizio() {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="start-screen">
+                    <h1 style="color: #667eea; font-size: 3em; margin-bottom: 20px;">🔓 ESCAPE ROOM 3</h1>
+                    <h2>FISICA - Test Pre-Elettrostatica</h2>
+                    <p>Completa tutte le domande delle 3 stanze per scoprire il codice di riscatto!</p>
+                    <p style="color: #999; font-size: 0.95em;">
+                        ⚠️ Stanza 1: Risposte dirette<br>
+                        💡 Stanze 2-3: Indizi progressivi se sbagli
+                    </p>
+                    <button class="btn-submit" onclick="iniziaStanza(0)" style="font-size: 1.2em; padding: 15px 30px; margin-top: 30px;">INIZIA IL GIOCO</button>
+                </div>
+            `;
+        }
+
+        function iniziaStanza(numeroStanza) {
+            statoGioco.stanzaCorrente = numeroStanza;
+            statoGioco.domandaCorrente = 0;
+            renderizzaDomanda();
+        }
+
+        function renderizzaDomanda() {
+            const stanza = gameData.stanze[statoGioco.stanzaCorrente];
+            const domanda = stanza.domande[statoGioco.domandaCorrente];
+            const content = document.getElementById('content');
+
+            const totaleQuesiti = stanza.domande.length;
+            const progress = ((statoGioco.domandaCorrente + 1) / totaleQuesiti) * 100;
+
+            let html = `
+                <div class="header">
+                    <h1>${stanza.nome}${domanda.bonus ? '<span class="bonus-badge">BONUS</span>' : ''}</h1>
+                    <p class="stanza-info">${stanza.descrizione}</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <div style="color: #666; font-size: 0.95em;">Domanda ${statoGioco.domandaCorrente + 1} di ${totaleQuesiti}</div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-number">Domanda ${statoGioco.domandaCorrente + 1}</div>
+                    <div class="question-text">${domanda.testo}</div>
+                    <div id="rispostaArea">
+            `;
+
+            if (domanda.tipo === 'testo') {
+                html += `
+                    <div class="input-group">
+                        <textarea id="risposta" placeholder="Scrivi la tua risposta..." rows="3"></textarea>
+                    </div>
+                `;
+            } else if (domanda.tipo === 'numerico') {
+                html += `
+                    <div class="input-group">
+                        <input type="number" id="risposta" placeholder="Scrivi il numero" step="0.01">
+                    </div>
+                `;
+            } else if (domanda.tipo === 'sceltaMultipla') {
+                html += `<div class="options">`;
+                domanda.opzioni.forEach((opzione, index) => {
+                    html += `
+                        <label class="option">
+                            <input type="radio" name="scelta" value="${opzione[0]}">
+                            ${opzione}
+                        </label>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            html += `
+                    </div>
+                    <div id="feedback"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-submit" onclick="inviaRisposta()">INVIA RISPOSTA</button>
+            `;
+
+            if (domanda.bonus) {
+                html += `<button class="btn-skip" onclick="saltaDomanda()">SALTA BONUS</button>`;
+            }
+
+            html += `</div>`;
+
+            content.innerHTML = html;
+            document.getElementById('risposta')?.focus();
+        }
+
+        function pulisciRisposta(risposta) {
+            return risposta.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        // Calcola la distanza di Levenshtein tra due stringhe
+        function distanzaLevenshtein(a, b) {
+            const matrice = [];
+            for (let i = 0; i <= b.length; i++) {
+                matrice[i] = [i];
+            }
+            for (let j = 0; j <= a.length; j++) {
+                matrice[0][j] = j;
+            }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrice[i][j] = matrice[i - 1][j - 1];
+                    } else {
+                        matrice[i][j] = Math.min(
+                            matrice[i - 1][j - 1] + 1,
+                            matrice[i][j - 1] + 1,
+                            matrice[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrice[b.length][a.length];
+        }
+
+        // Calcola la similarità percentuale tra due stringhe
+        function calcolaSimilarita(str1, str2) {
+            const s1 = pulisciRisposta(str1);
+            const s2 = pulisciRisposta(str2);
+            const maxLen = Math.max(s1.length, s2.length);
+            if (maxLen === 0) return 1.0;
+            const distanza = distanzaLevenshtein(s1, s2);
+            return (maxLen - distanza) / maxLen;
+        }
+
+        // Verifica se la risposta è simile a una risposta valida
+        function verificaSomiglianza(rispostaUtente, risposteValide, soglia = 0.75) {
+            for (let rispostaValida of risposteValide) {
+                const similarita = calcolaSimilarita(rispostaUtente, rispostaValida);
+                if (similarita >= soglia) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function inviaRisposta() {
+            const stanza = gameData.stanze[statoGioco.stanzaCorrente];
+            const domanda = stanza.domande[statoGioco.domandaCorrente];
+            const feedback = document.getElementById('feedback');
+
+            let risposta;
+            if (domanda.tipo === 'testo') {
+                risposta = document.getElementById('risposta').value;
+            } else if (domanda.tipo === 'numerico') {
+                risposta = parseFloat(document.getElementById('risposta').value);
+            } else if (domanda.tipo === 'sceltaMultipla') {
+                risposta = document.querySelector('input[name="scelta"]:checked')?.value;
+            }
+
+            if (!risposta && risposta !== 0) {
+                feedback.innerHTML = '<p>⚠️ Inserisci una risposta!</p>';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+
+            let rispostaCorretta = false;
+
+            if (domanda.tipo === 'testo') {
+                // Prima controlla match esatto
+                const rispostaLimpia = pulisciRisposta(risposta);
+                rispostaCorretta = domanda.risposteValide.some(r => pulisciRisposta(r) === rispostaLimpia);
+                // Se non esatto, controlla similarità (80%)
+                if (!rispostaCorretta) {
+                    rispostaCorretta = verificaSomiglianza(risposta, domanda.risposteValide, 0.80);
+                }
+            } else if (domanda.tipo === 'numerico') {
+                rispostaCorretta = Math.abs(risposta - domanda.rispostaCorretta) <= domanda.tolleranza;
+            } else if (domanda.tipo === 'sceltaMultipla') {
+                rispostaCorretta = risposta === domanda.rispostaCorretta;
+            }
+
+            if (rispostaCorretta) {
+                statoGioco.risposteCorrette++;
+                feedback.innerHTML = '✅ RISPOSTA CORRETTA!<br><button class="btn-next" onclick="prossimaOAltro()" style="margin-top: 15px;">CONTINUA</button>';
+                feedback.className = 'feedback correct';
+            } else {
+                statoGioco.risposteSbagliate++;
+                if (statoGioco.stanzaCorrente === 0) {
+                    // Stanza 1: risposta diretta
+                    const rispostaGiusta = domanda.tipo === 'testo' ? domanda.risposteValide[0] : domanda.rispostaCorretta;
+                    feedback.innerHTML = `❌ RISPOSTA SBAGLIATA!<br>Risposta corretta: <strong>${rispostaGiusta}</strong><br><button class="btn-next" onclick="prossimaOAltro()" style="margin-top: 15px;">CONTINUA</button>`;
+                    feedback.className = 'feedback incorrect';
+                } else {
+                    // Stanze 2-3: indizi
+                    if (domanda.indizi) {
+                        if (statoGioco.indicziMostrati < domanda.indizi.length) {
+                            const indizio = domanda.indizi[statoGioco.indicziMostrati];
+                            feedback.innerHTML = `
+                                <p>❌ Risposta sbagliata, ma non arrenderti!</p>
+                                <div class="hints-container">
+                                    <div class="hint-item"><strong>${indizio}</strong></div>
+                                </div>
+                                <p style="margin-top: 15px; color: #666; font-size: 0.9em;">Riprova con il suggerimento...</p>
+                            `;
+                            feedback.className = 'feedback hint';
+                            statoGioco.indicziMostrati++;
+                            document.getElementById('risposta')?.focus();
+                            return;
+                        } else {
+                            const rispostaGiusta = domanda.tipo === 'testo' ? domanda.risposteValide[0] : domanda.rispostaCorretta;
+                            feedback.innerHTML = `
+                                ❌ HAI ESAURITO GLI INDIZI!<br>Risposta corretta: <strong>${rispostaGiusta}</strong><br><button class="btn-next" onclick="prossimaOAltro()" style="margin-top: 15px;">CONTINUA</button>
+                            `;
+                            feedback.className = 'feedback incorrect';
+                        }
+                    }
+                }
+            }
+        }
+
+        function saltaDomanda() {
+            const stanza = gameData.stanze[statoGioco.stanzaCorrente];
+            const domanda = stanza.domande[statoGioco.domandaCorrente];
+            if (domanda.bonus) {
+                prossimaOAltro();
+            }
+        }
+
+        function prossimaOAltro() {
+            statoGioco.indicziMostrati = 0;
+            const stanza = gameData.stanze[statoGioco.stanzaCorrente];
+
+            if (statoGioco.domandaCorrente < stanza.domande.length - 1) {
+                statoGioco.domandaCorrente++;
+                renderizzaDomanda();
+            } else {
+                renderizzaCompletamentoStanza();
+            }
+        }
+
+        function renderizzaCompletamentoStanza() {
+            const stanza = gameData.stanze[statoGioco.stanzaCorrente];
+            const content = document.getElementById('content');
+
+            let html = `
+                <div class="stanza-complete">
+                    <h2>🎉 STANZA ${stanza.numero} COMPLETATA!</h2>
+                    <p style="font-size: 1.2em; color: #666; margin: 20px 0;">
+                        Risposte corrette: <strong>${statoGioco.risposteCorrette}</strong><br>
+                        Errori: <strong>${statoGioco.risposteSbagliate}</strong>
+                    </p>
+            `;
+
+            if (statoGioco.stanzaCorrente < gameData.stanze.length - 1) {
+                html += `
+                    <button class="btn-next" onclick="iniziaStanza(${statoGioco.stanzaCorrente + 1})" style="margin-top: 20px; font-size: 1.1em;">PASSA ALLA STANZA ${statoGioco.stanzaCorrente + 2}</button>
+                `;
+            } else {
+                html += `
+                    <button class="btn-next" onclick="renderizzaFinale()" style="margin-top: 20px; font-size: 1.1em;">SCOPRI IL CODICE FINALE!</button>
+                `;
+            }
+
+            html += `</div>`;
+            content.innerHTML = html;
+        }
+
+        function renderizzaFinale() {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="final-message">
+                    <h2>🏆 COMPLIMENTI!</h2>
+                    <p style="font-size: 1.1em; color: #666; margin-bottom: 20px;">Hai completato l'Escape Room 3!</p>
+                    <p style="font-size: 1em; color: #666; margin-bottom: 30px;">
+                        Risposte totali corrette: <strong>${statoGioco.risposteCorrette}</strong> su 24<br>
+                        Errori totali: <strong>${statoGioco.risposteSbagliate}</strong>
+                    </p>
+                    <p style="color: #666; font-size: 0.95em; margin-bottom: 20px;">Ecco il tuo codice di riscatto:</p>
+                    <div class="final-code">CULTURA</div>
+                    <button class="btn-submit" onclick="inizioGioco()" style="margin-top: 20px; font-size: 1.1em;">RICOMINCIA</button>
+                </div>
+            `;
+        }
+
+        // Avvia il gioco
+        inizioGioco();
+    </script>
+</body>
+</html>
