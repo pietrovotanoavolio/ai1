@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Spaziotemporale: Archimede & le Leve</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        
+        .speaking-pulse {
+            animation: pulse-border 1.5s infinite;
+        }
+        
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400">
+                    <i class="fa-solid font-cinzel text-xl font-bold">A</i>
+                </div>
+                <div>
+                    <h1 class="font-cinzel font-bold text-lg text-amber-300 leading-tight">Intervista a Siracusa</h1>
+                    <p class="text-xs text-slate-400">Archimede incontra la Fisica Moderna</p>
+                </div>
+            </div>
+
+            <!-- Global Player Controls -->
+            <div class="flex items-center gap-3">
+                <button id="btnPlayAll" onclick="startFullPodcast()" class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm">
+                    <i class="fa-solid fa-play" id="iconPlayAll"></i>
+                    <span id="textPlayAll">Ascolta Podcast Intero</span>
+                </button>
+                <button id="btnStopAudio" onclick="stopAudio()" class="hidden flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-3 py-2 rounded-xl transition text-sm">
+                    <i class="fa-solid fa-square"></i>
+                    <span>Stop</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Interactive Dialogue Transcript (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col space-y-4">
+            <div class="flex items-center justify-between bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                <div class="flex items-center gap-2 text-sm text-slate-300">
+                    <i class="fa-solid fa-microphone-lines text-amber-400"></i>
+                    <span class="font-semibold">Trascrizione dell'Intervista</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span> Archimede
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500 ml-2"></span> Marco (Studente)
+                </div>
+            </div>
+
+            <!-- Chat / Script Container -->
+            <div id="transcriptContainer" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                <!-- Dialogue Line 1 -->
+                <div id="line-0" class="dialogue-card p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex-shrink-0 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                            M
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-indigo-400">Marco (Studente)</span>
+                                <button onclick="playSingleLine(0)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg transition text-xs flex items-center gap-1 bg-slate-800/80 px-2 py-0.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Ascolta
+                                </button>
+                            </div>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                Salve Maestro Archimede! È un onore pazzesco conoscerla. A scuola diciamo sempre la sua celebre frase: "Datemi un punto d'appoggio e solleverò la Terra!". Ma era una battuta o fa sul serio?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Line 2 -->
+                <div id="line-1" class="dialogue-card p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 transition relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full bg-amber-500/30 border border-amber-500/50 flex-shrink-0 flex items-center justify-center text-amber-400 font-cinzel font-bold text-sm">
+                            A
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-amber-400">Archimede di Siracusa</span>
+                                <button onclick="playSingleLine(1)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg transition text-xs flex items-center gap-1 bg-slate-800/80 px-2 py-0.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Ascolta
+                                </button>
+                            </div>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                Salve a te, giovane studente! Ero seriamente intenzionato! Matematicamente, se si possiede una leva con un braccio abbastanza lungo, nessuna massa al mondo è troppo grande da non poter essere sollevata con una piccola forza. È la potenza della geometria!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Line 3 -->
+                <div id="line-2" class="dialogue-card p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex-shrink-0 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                            M
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-indigo-400">Marco (Studente)</span>
+                                <button onclick="playSingleLine(2)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg transition text-xs flex items-center gap-1 bg-slate-800/80 px-2 py-0.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Ascolta
+                                </button>
+                            </div>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                Fantastico! Ma qui a scuola spesso ci confondiamo con i tre ordini di leva. Come faccio a distinguere subito una forbice da uno schiaccianoci o da una pinzetta?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Line 4 -->
+                <div id="line-3" class="dialogue-card p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 transition relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full bg-amber-500/30 border border-amber-500/50 flex-shrink-0 flex items-center justify-center text-amber-400 font-cinzel font-bold text-sm">
+                            A
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-amber-400">Archimede di Siracusa</span>
+                                <button onclick="playSingleLine(3)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg transition text-xs flex items-center gap-1 bg-slate-800/80 px-2 py-0.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Ascolta
+                                </button>
+                            </div>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                Ascolta bene questo trucco: devi guardare solo **cosa si trova al centro**! 
+                                Nella **1ª classe** il Fulcro sta al centro, come l'altalena o le forbici. 
+                                Nella **2ª classe** la Resistenza sta al centro, come nella carriola o nello schiaccianoci: è sempre vantaggiosa! 
+                                Nella **3ª classe** la Potenza sta al centro, come nelle pinzette o nel tuo bicipite!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Line 5 -->
+                <div id="line-4" class="dialogue-card p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex-shrink-0 flex items-center justify-center text-indigo-400 font-bold text-sm">
+                            M
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-indigo-400">Marco (Studente)</span>
+                                <button onclick="playSingleLine(4)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg transition text-xs flex items-center gap-1 bg-slate-800/80 px-2 py-0.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Ascolta
+                                </button>
+                            </div>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                Aspetti! Il mio bicipite è una leva? E perché usiamo una leva svantaggiosa se richiede più forza muscolare?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Line 6 -->
+                <div id="line-5" class="dialogue-card p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 transition relative group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-full bg-amber-500/30 border border-amber-500/50 flex-shrink-0 flex items-center justify-center text-amber-400 font-cinzel font-bold text-sm">
+                            A
+                        </div>
+                        <div class="flex-grow space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-amber-400">Archimede di Siracusa</span>
+                                <button onclick="playSingleLine(5)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg transition text-xs flex items-center gap-1 bg-slate-800/80 px-2 py-0.5">
+                                    <i class="fa-solid fa-play text-[10px]"></i> Ascolta
+                                </button>
+                            </div>
+                            <p class="text-sm text-slate-200 leading-relaxed">
+                                Ottima intuizione! La natura ha scelto una leva svantaggiosa per il bicipite perché essa guadagna in **ampiezza e velocità di movimento**. Con un piccolissimo accorciamento del muscolo, la tua mano compie uno spostamento grandissimo! E ricordati l'equilibrio: Potenza per braccio della potenza è uguale a Resistenza per braccio della resistenza!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive "Ask Archimedes" Feature -->
+            <div class="bg-slate-900 border border-amber-500/30 p-4 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-amber-300 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Fai una domanda diretta ad Archimede
+                    </h3>
+                    <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20">Risposta Audio Live</span>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="customPrompt" placeholder="Es. Perché lo schiaccianoci è sempre vantaggioso?" class="flex-grow bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500">
+                    <button onclick="askArchimedes()" id="btnAsk" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center gap-1 flex-shrink-0">
+                        <i class="fa-solid fa-paper-plane"></i> Chiedi
+                    </button>
+                </div>
+                <div id="aiAnswerContainer" class="hidden p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between text-xs text-amber-400 font-semibold">
+                        <span>Archimede risponde:</span>
+                        <button onclick="playCustomAudio()" id="btnPlayCustom" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 flex items-center gap-1">
+                            <i class="fa-solid fa-volume-high"></i> Ascolta
+                        </button>
+                    </div>
+                    <p id="aiAnswerText" class="text-xs text-slate-300 italic leading-relaxed"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Interactive Lever Simulator & Quick Info (5 Cols) -->
+        <section class="lg:col-span-5 flex flex-col space-y-4">
+            
+            <!-- Lever Interactive Visualizer -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-4 shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-flask-vial text-amber-400"></i> Laboratorio Visuale della Leva
+                    </h2>
+                    <span id="leverClassBadge" class="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        1ª Classe (F al centro)
+                    </span>
+                </div>
+
+                <!-- Canvas Visualizer -->
+                <div class="relative w-full h-44 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden">
+                    <canvas id="leverCanvas" class="w-full h-full"></canvas>
+                </div>
+
+                <!-- Lever Class Selector Buttons -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setLeverClass(1)" id="btnClass1" class="py-2 px-1 text-xs font-medium rounded-xl border border-amber-500/50 bg-amber-500/20 text-amber-300 text-center transition">
+                        1ª Classe<br><span class="text-[10px] text-slate-400">P - F - R</span>
+                    </button>
+                    <button onclick="setLeverClass(2)" id="btnClass2" class="py-2 px-1 text-xs font-medium rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700 text-center transition">
+                        2ª Classe<br><span class="text-[10px] text-slate-400">F - R - P</span>
+                    </button>
+                    <button onclick="setLeverClass(3)" id="btnClass3" class="py-2 px-1 text-xs font-medium rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700 text-center transition">
+                        3ª Classe<br><span class="text-[10px] text-slate-400">F - P - R</span>
+                    </button>
+                </div>
+
+                <!-- Sliders for arms -->
+                <div class="space-y-3 pt-2 text-xs border-t border-slate-800">
+                    <div>
+                        <div class="flex justify-between text-slate-400 mb-1">
+                            <span>Braccio Potenza ($b_p$): <strong id="valBp" class="text-indigo-400">120 cm</strong></span>
+                            <span>Braccio Resistenza ($b_r$): <strong id="valBr" class="text-red-400">60 cm</strong></span>
+                        </div>
+                        <input type="range" id="sliderFulcrum" min="20" max="80" value="66" class="w-full accent-amber-500 cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Stato Leva:</span>
+                        <span id="leverStatusText" class="font-bold text-emerald-400">VANTAGGIOSA ($b_p > b_r$)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mnemonics Cheat Card -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 p-4 rounded-2xl space-y-3">
+                <h3 class="text-xs font-bold tracking-wider text-slate-400 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-amber-400"></i> Mnemotecnica Rapida
+                </h3>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <span class="block font-bold text-amber-400 text-lg">F</span>
+                        <span class="text-[10px] text-slate-400">1ª Classe (Centro: Fulcro)</span>
+                    </div>
+                    <div class="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <span class="block font-bold text-emerald-400 text-lg">R</span>
+                        <span class="text-[10px] text-slate-400">2ª Classe (Centro: Resistenza)</span>
+                    </div>
+                    <div class="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <span class="block font-bold text-indigo-400 text-lg">P</span>
+                        <span class="text-[10px] text-slate-400">3ª Classe (Centro: Potenza)</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-xs text-slate-500">
+        <p>Podcast Didattico sulle Leve • Archimede & Fisica Scuola Superiore</p>
+    </footer>
+
+    <script>
+        // API Configuration (Gemini API runtime fallback)
+        const apiKey = "";
+        const ttsApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const llmApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        // Script Data
+        const scriptLines = [
+            { speaker: "Marco", voice: "Puck", text: "Salve Maestro Archimede! È un onore pazzesco conoscerla. A scuola diciamo sempre la sua celebre frase: Datemi un punto d'appoggio e solleverò la Terra! Ma era una battuta o fa sul serio?" },
+            { speaker: "Archimede", voice: "Gacrux", text: "Say enthusiastically as Archimedes: Salve a te, giovane studente! Ero seriamente intenzionato! Matematicamente, se si possiede una leva con un braccio abbastanza lungo, nessuna massa al mondo è troppo grande da non poter essere sollevata con una piccola forza. È la potenza della geometria!" },
+            { speaker: "Marco", voice: "Puck", text: "Fantastico! Ma qui a scuola spesso ci confondiamo con i tre ordini di leva. Come faccio a distinguere subito una forbice da uno schiaccianoci o da una pinzetta?" },
+            { speaker: "Archimede", voice: "Gacrux", text: "Say clearly as Archimedes: Ascolta bene questo trucco: devi guardare solo cosa si trova al centro! Nella prima classe il Fulcro sta al centro, come l'altalena o le forbici. Nella seconda classe la Resistenza sta al centro, come nella carriola o nello schiaccianoci: è sempre vantaggiosa! Nella terza classe la Potenza sta al centro, come nelle pinzette o nel tuo bicipite!" },
+            { speaker: "Marco", voice: "Puck", text: "Aspetti! Il mio bicipite è una leva? E perché usiamo una leva svantaggiosa se richiede più forza muscolare?" },
+            { speaker: "Archimede", voice: "Gacrux", text: "Say wisely: Ottima intuizione! La natura ha scelto una leva svantaggiosa per il bicipite perché essa guadagna in ampiezza e velocità di movimento. Con un piccolissimo accorciamento del muscolo, la tua mano compie uno spostamento grandissimo!" }
+        ];
+
+        let currentLineIndex = -1;
+        let isPlayingPodcast = false;
+        let currentAudio = null;
+        let customAudioBlobUrl = null;
+
+        // Helper: Convert Base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Helper: Convert PCM16 to WAV Blob
+        function pcmToWav(pcm16Data, sampleRate = 24000) {
+            const buffer = new ArrayBuffer(44 + pcm16Data.length * 2);
+            const view = new DataView(buffer);
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcm16Data.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // Raw PCM
+            view.setUint16(22, 1, true); // Mono
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcm16Data.length * 2, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16Data.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16Data[i], true);
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        // Generate TTS for a specific text line using Gemini TTS
+        async function fetchLineTTS(text, voiceName) {
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: text }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: voiceName }
+                            }
+                        }
+                    }
+                };
+
+                const response = await fetch(ttsApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("TTS API call failed");
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const base64Audio = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType || "";
+
+                if (base64Audio) {
+                    let sampleRate = 24000;
+                    const match = mimeType.match(/rate=(\d+)/);
+                    if (match) sampleRate = parseInt(match[1], 10);
+
+                    const pcmBuffer = base64ToArrayBuffer(base64Audio);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    return URL.createObjectURL(wavBlob);
+                }
+            } catch (err) {
+                console.warn("Gemini TTS API fallback to Web Speech API", err);
+            }
+            return null; // Fallback handled elsewhere
+        }
+
+        // Web Speech Synthesis Fallback
+        function fallbackWebSpeech(text, isArchimedes, onEnd) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text.replace(/Say.*?:/g, ''));
+            utterance.lang = 'it-IT';
+            utterance.pitch = isArchimedes ? 0.8 : 1.2;
+            utterance.rate = 1.0;
+
+            utterance.onend = onEnd;
+            utterance.onerror = onEnd;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Play single line
+        async function playSingleLine(index) {
+            stopAudio();
+            currentLineIndex = index;
+            highlightLine(index);
+
+            const item = scriptLines[index];
+            const audioUrl = await fetchLineTTS(item.text, item.voice);
+
+            if (audioUrl) {
+                currentAudio = new Audio(audioUrl);
+                currentAudio.onended = () => {
+                    unhighlightAll();
+                    if (isPlayingPodcast) playNextLine();
+                };
+                currentAudio.play();
+            } else {
+                fallbackWebSpeech(item.text, item.speaker === "Archimede", () => {
+                    unhighlightAll();
+                    if (isPlayingPodcast) playNextLine();
+                });
+            }
+        }
+
+        function playNextLine() {
+            if (currentLineIndex + 1 < scriptLines.length) {
+                playSingleLine(currentLineIndex + 1);
+            } else {
+                stopAudio();
+            }
+        }
+
+        function startFullPodcast() {
+            if (isPlayingPodcast) {
+                stopAudio();
+                return;
+            }
+            isPlayingPodcast = true;
+            document.getElementById('iconPlayAll').className = "fa-solid fa-pause";
+            document.getElementById('textPlayAll').innerText = "Pausa Podcast";
+            document.getElementById('btnStopAudio').classList.remove('hidden');
+            playSingleLine(0);
+        }
+
+        function stopAudio() {
+            isPlayingPodcast = false;
+            window.speechSynthesis.cancel();
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            document.getElementById('iconPlayAll').className = "fa-solid fa-play";
+            document.getElementById('textPlayAll').innerText = "Ascolta Podcast Intero";
+            document.getElementById('btnStopAudio').classList.add('hidden');
+            unhighlightAll();
+        }
+
+        function highlightLine(index) {
+            unhighlightAll();
+            const el = document.getElementById(`line-${index}`);
+            if (el) {
+                el.classList.add('speaking-pulse', 'border-amber-500');
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function unhighlightAll() {
+            document.querySelectorAll('.dialogue-card').forEach(card => {
+                card.classList.remove('speaking-pulse', 'border-amber-500');
+            });
+        }
+
+        async function askArchimedes() {
+            const promptInput = document.getElementById('customPrompt');
+            const question = promptInput.value.trim();
+            if (!question) return;
+
+            const btnAsk = document.getElementById('btnAsk');
+            const answerContainer = document.getElementById('aiAnswerContainer');
+            const answerText = document.getElementById('aiAnswerText');
+
+            btnAsk.disabled = true;
+            btnAsk.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Pensando...`;
+            answerContainer.classList.remove('hidden');
+            answerText.innerText = "Archimede sta riflettendo sulla tua domanda...";
+
+            try {
+                // Call Gemini LLM for response
+                const payload = {
+                    contents: [{ parts: [{ text: `Sei Archimede di Siracusa. Rispondi in italiano in massimo 2 frasi, con entusiasmo e rigore scientifico, a uno studente che ti chiede: "${question}"` }] }]
+                };
+
+                const res = await fetch(llmApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Per Ercole! La risposta si nasconde nei principi della geometria!";
+                answerText.innerText = `"${reply}"`;
+
+                // Pre-generate Audio for custom reply
+                customAudioBlobUrl = await fetchLineTTS(`Say as Archimedes: ${reply}`, "Gacrux");
+
+            } catch (e) {
+                answerText.innerText = "Non sono riuscito a sentire bene la domanda, riprova fra poco!";
+            } finally {
+                btnAsk.disabled = false;
+                btnAsk.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Chiedi`;
+            }
+        }
+
+        async function playCustomAudio() {
+            const answerText = document.getElementById('aiAnswerText').innerText;
+            if (customAudioBlobUrl) {
+                if (currentAudio) currentAudio.pause();
+                currentAudio = new Audio(customAudioBlobUrl);
+                currentAudio.play();
+            } else {
+                fallbackWebSpeech(answerText, true, () => {});
+            }
+        }
+
+        // Lever Visualizer Canvas Logic
+        let currentLeverClass = 1;
+        const canvas = document.getElementById('leverCanvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('sliderFulcrum');
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            drawLever();
+        }
+
+        function setLeverClass(cls) {
+            currentLeverClass = cls;
+            
+            // Update UI buttons
+            [1, 2, 3].forEach(i => {
+                const btn = document.getElementById(`btnClass${i}`);
+                if (i === cls) {
+                    btn.className = "py-2 px-1 text-xs font-medium rounded-xl border border-amber-500/50 bg-amber-500/20 text-amber-300 text-center transition";
+                } else {
+                    btn.className = "py-2 px-1 text-xs font-medium rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700 text-center transition";
+                }
+            });
+
+            const badge = document.getElementById('leverClassBadge');
+            if (cls === 1) badge.innerText = "1ª Classe (F al centro)";
+            if (cls === 2) badge.innerText = "2ª Classe (R al centro)";
+            if (cls === 3) badge.innerText = "3ª Classe (P al centro)";
+
+            drawLever();
+        }
+
+        function drawLever() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cy = h / 2 + 10;
+            const margin = 40;
+            const leverLen = w - margin * 2;
+
+            const sliderVal = parseInt(slider.value) / 100; // 0.2 to 0.8
+
+            let fulcrumX, powerX, resistX;
+
+            if (currentLeverClass === 1) { // P - F - R
+                fulcrumX = margin + leverLen * sliderVal;
+                powerX = margin;
+                resistX = margin + leverLen;
+            } else if (currentLeverClass === 2) { // F - R - P
+                fulcrumX = margin;
+                resistX = margin + leverLen * (sliderVal * 0.8);
+                powerX = margin + leverLen;
+            } else { // F - P - R (3rd class)
+                fulcrumX = margin;
+                powerX = margin + leverLen * (sliderVal * 0.8);
+                resistX = margin + leverLen;
+            }
+
+            const bp = Math.abs(powerX - fulcrumX);
+            const br = Math.abs(resistX - fulcrumX);
+
+            // Update text values
+            document.getElementById('valBp').innerText = `${Math.round(bp)} cm`;
+            document.getElementById('valBr').innerText = `${Math.round(br)} cm`;
+
+            const statusText = document.getElementById('leverStatusText');
+            if (bp > br) {
+                statusText.innerText = "VANTAGGIOSA (bp > br)";
+                statusText.className = "font-bold text-emerald-400";
+            } else if (bp < br) {
+                statusText.innerText = "SVANTAGGIOSA (bp < br)";
+                statusText.className = "font-bold text-rose-400";
+            } else {
+                statusText.innerText = "INDIFFERENTE (bp = br)";
+                statusText.className = "font-bold text-amber-400";
+            }
+
+            // Draw Lever Bar
+            ctx.strokeStyle = "#94a3b8";
+            ctx.lineWidth = 6;
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(margin, cy);
+            ctx.lineTo(margin + leverLen, cy);
+            ctx.stroke();
+
+            // Draw Fulcro (Triangle)
+            ctx.fillStyle = "#f59e0b";
+            ctx.beginPath();
+            ctx.moveTo(fulcrumX, cy);
+            ctx.lineTo(fulcrumX - 12, cy + 22);
+            ctx.lineTo(fulcrumX + 12, cy + 22);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = "#fbbf24";
+            ctx.font = "bold 11px Inter";
+            ctx.fillText("F", fulcrumX - 4, cy + 34);
+
+            // Draw Power Arrow (P)
+            ctx.strokeStyle = "#818cf8";
+            ctx.fillStyle = "#818cf8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(powerX, cy - 35);
+            ctx.lineTo(powerX, cy - 5);
+            ctx.stroke();
+            // Arrowhead
+            ctx.beginPath();
+            ctx.moveTo(powerX - 5, cy - 10);
+            ctx.lineTo(powerX, cy - 2);
+            ctx.lineTo(powerX + 5, cy - 10);
+            ctx.fill();
+            ctx.fillText("P (Forza)", powerX - 20, cy - 40);
+
+            // Draw Resistance Box (R)
+            ctx.fillStyle = "#f87171";
+            ctx.fillRect(resistX - 12, cy - 25, 24, 22);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 10px Inter";
+            ctx.fillText("R", resistX - 3, cy - 10);
+        }
+
+        // Initialize event listeners
+        window.addEventListener('resize', resizeCanvas);
+        slider.addEventListener('input', drawLever);
+
+        window.onload = () => {
+            resizeCanvas();
+        };
+    </script>
+</body>
+</html>
