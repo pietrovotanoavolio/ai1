@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Escape Room Fisica HD</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0b0f19; color: #f8fafc; margin: 0; }
+    .app-container { display: flex; min-height: 100vh; }
+    .game-area { flex: 3; padding: 25px; background: radial-gradient(circle at center, #1e293b, #0b0f19); }
+    .calc-sidebar { flex: 1; background: #111827; border-left: 2px solid #38bdf8; padding: 15px; }
+    #word-progress { font-size: 2.2rem; letter-spacing: 8px; color: #38bdf8; text-shadow: 0 0 12px #38bdf8; margin: 10px 0; }
+    .error-shake { animation: shake 0.4s; border: 2px solid #ef4444 !important; box-shadow: 0 0 20px #ef4444 !important; }
+    .correct-glow { animation: glow 0.6s; border: 2px solid #22c55e !important; box-shadow: 0 0 20px #22c55e !important; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-10px)} 40%,80%{transform:translateX(10px)} }
+    @keyframes glow { 0%,100%{box-shadow:0 0 5px #22c55e} 50%{box-shadow:0 0 20px #22c55e} }
+    #svg-box { width: 100%; max-width: 480px; height: 200px; background: #030712; border: 2px solid #38bdf8; border-radius: 12px; margin: 15px 0; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 15px rgba(56,189,248,0.2); }
+    #room-modal { display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-content { background: #1e293b; padding: 30px; border-radius: 12px; text-align: center; border: 2px solid #22c55e; }
+    button { cursor: pointer; padding: 10px 16px; border-radius: 6px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; margin: 4px; transition: 0.2s; }
+    button:hover { background: #7dd3fc; }
+    input[type="text"] { padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; width: 60%; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="game-area">
+      <div id="start-screen">
+        <h2>🔐 Escape Room di Fisica (Edizione HD)</h2>
+        <p>Inserisci il tuo nome per iniziare la sfida:</p>
+        <input type="text" id="player-name-input" placeholder="Il tuo nome..."><br><br>
+        <button onclick="startGame()">INIZIA GIOCO</button>
+      </div>
+
+      <div id="game-screen" style="display:none;">
+        <h3 id="room-title">Stanza 1</h3>
+        <div id="timer-display" style="font-size:1.3rem; color:#f59e0b; font-weight:bold;">Tempo: 45s</div>
+        <div id="word-progress">_ _ _ _</div>
+        <div id="svg-box"></div>
+        <p id="question-text" style="font-size:1.1rem; min-height: 50px;"></p>
+        <input type="text" id="user-answer" placeholder="Inserisci il valore o la risposta...">
+        <button onclick="checkAnswer()">Invia Risposta</button>
+      </div>
+
+      <div id="room-modal">
+        <div class="modal-content">
+          <h2>🎉 STANZA SUPERATA!</h2>
+          <p id="modal-msg"></p>
+          <button onclick="closeModal()">PROSEGUI ➔</button>
+        </div>
+      </div>
+
+      <div id="end-screen" style="display:none; padding:20px; background:#1e293b; border-radius:8px;">
+        <h3>🏆 FUGA COMPLETATA!</h3>
+        <p id="final-score" style="font-size:1.2rem;"></p>
+        <h4>🥇 Classifica Giocatori:</h4>
+        <ol id="leaderboard"></ol>
+        <button onclick="location.reload()">Gioca Ancora</button>
+      </div>
+    </div>
+
+    <div class="calc-sidebar">
+      <h3>🔢 Calcolatrice Scientifica</h3>
+      <label>🔊 Musica: </label>
+      <input type="range" min="0" max="1" step="0.1" value="0.3" oninput="setVol(this.value)"><br><br>
+      <input type="text" id="calc-display" readonly style="width:90%; margin-bottom:10px; font-size:1.2rem; text-align:right; padding:5px;">
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">
+        <button onclick="addCalc('7')">7</button><button onclick="addCalc('8')">8</button><button onclick="addCalc('9')">9</button><button onclick="addCalc('/')">/</button>
+        <button onclick="addCalc('4')">4</button><button onclick="addCalc('5')">5</button><button onclick="addCalc('6')">6</button><button onclick="addCalc('*')">*</button>
+        <button onclick="addCalc('1')">1</button><button onclick="addCalc('2')">2</button><button onclick="addCalc('3')">3</button><button onclick="addCalc('-')">-</button>
+        <button onclick="addCalc('0')">0</button><button onclick="addCalc('.')">.</button><button onclick="clearCalc()">C</button><button onclick="addCalc('+')">+</button>
+        <button onclick="evalCalc()" style="grid-column: span 4; background:#22c55e; color:#fff;">=</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let room=1, qIndex=0, errori=0, score=0, timer, timeLeft=45, playerName="Giocatore";
+
+    const illustrations = {
+      1: [
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" /><stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" /></linearGradient></defs>
+          <rect x="20" y="110" width="300" height="8" fill="#334155" rx="4"/>
+          <rect x="40" y="75" width="70" height="35" fill="url(#grad1)" rx="6"/>
+          <circle cx="55" cy="110" r="8" fill="#0f172a"/>
+          <circle cx="95" cy="110" r="8" fill="#0f172a"/>
+          <path d="M 120 92 L 260 92" stroke="#22c55e" stroke-width="4" stroke-dasharray="6" stroke-linecap="round"/>
+          <polygon points="265,92 250,85 250,99" fill="#22c55e"/>
+          <text x="140" y="80" fill="#22c55e" font-weight="bold" font-size="14">v = 14.5 m/s | t = 12.4 s</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <line x1="40" y1="130" x2="300" y2="130" stroke="#38bdf8" stroke-width="4"/>
+          <line x1="40" y1="130" x2="40" y2="20" stroke="#f43f5e" stroke-width="4"/>
+          <text x="270" y="120" fill="#38bdf8" font-weight="bold" font-size="16">Asse X</text>
+          <text x="50" y="35" fill="#f43f5e" font-weight="bold" font-size="16">Asse Y</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <path d="M 30 130 Q 170 -30 310 130" stroke="#38bdf8" stroke-width="4" fill="none" stroke-dasharray="8"/>
+          <circle cx="170" cy="50" r="12" fill="#f59e0b"/>
+          <text x="110" y="145" fill="#94a3b8" font-size="13">s = 487.5 m in t = 15 s</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <circle cx="170" cy="80" r="50" stroke="#38bdf8" stroke-width="4" fill="none"/>
+          <text x="150" y="88" fill="#f43f5e" font-size="24" font-weight="bold">ω</text>
+          <text x="120" y="150" fill="#cbd5e1" font-size="13">f = 2.5 Hz (ω = 2·π·f)</text>
+        </svg>`
+      ],
+      2: [
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="120" y="50" width="100" height="60" fill="#38bdf8" rx="8"/>
+          <text x="135" y="85" fill="#0f172a" font-weight="bold">m = 12.5 kg</text>
+          <line x1="30" y1="80" x2="110" y2="80" stroke="#22c55e" stroke-width="6"/>
+          <text x="40" y="65" fill="#22c55e" font-weight="bold">a = 6.4 m/s²</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="120" y="50" width="100" height="60" fill="#f43f5e" rx="8"/>
+          <text x="130" y="85" fill="#fff" font-weight="bold">F = 157.5 N</text>
+          <text x="135" y="102" fill="#fff" font-size="12">m = 12.5 kg</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <line x1="40" y1="80" x2="160" y2="80" stroke="#38bdf8" stroke-width="6"/>
+          <line x1="160" y1="80" x2="280" y2="80" stroke="#22c55e" stroke-width="6"/>
+          <text x="120" y="55" fill="#f59e0b" font-weight="bold" font-size="16">F_risultante</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <line x1="60" y1="120" x2="260" y2="120" stroke="#38bdf8" stroke-width="4"/>
+          <line x1="160" y1="120" x2="160" y2="30" stroke="#f43f5e" stroke-width="5"/>
+          <text x="175" y="50" fill="#f43f5e" font-weight="bold">F ⊥ S (90°)</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="110" y="70" width="120" height="50" fill="#eab308" rx="6"/>
+          <line x1="110" y1="95" x2="40" y2="95" stroke="#f43f5e" stroke-width="5"/>
+          <text x="45" y="80" fill="#f43f5e" font-weight="bold">F_attrito</text>
+        </svg>`
+      ],
+      3: [
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <circle cx="170" cy="80" r="25" fill="#f59e0b"/>
+          <ellipse cx="170" cy="80" rx="130" ry="50" stroke="#38bdf8" stroke-width="3" fill="none" stroke-dasharray="6"/>
+          <circle cx="290" cy="80" r="10" fill="#38bdf8"/>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="80" y="30" width="180" height="110" fill="#0284c7" opacity="0.7" rx="8"/>
+          <line x1="170" y1="30" x2="170" y2="120" stroke="#f59e0b" stroke-width="4" stroke-dasharray="4"/>
+          <text x="180" y="80" fill="#fff" font-weight="bold">h = 5 m | d = 1000</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="150" y="30" width="40" height="100" fill="#94a3b8" rx="6"/>
+          <circle cx="170" cy="90" r="16" fill="#ef4444"/>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="80" y="50" width="180" height="80" fill="#0284c7" opacity="0.6" rx="8"/>
+          <rect x="140" y="70" width="60" height="45" fill="#eab308" rx="4"/>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <rect x="90" y="60" width="160" height="80" fill="#0284c7" opacity="0.7" rx="8"/>
+          <path d="M 170 120 L 170 40" stroke="#22c55e" stroke-width="6"/>
+          <polygon points="170,30 160,45 180,45" fill="#22c55e"/>
+          <text x="185" y="45" fill="#22c55e" font-weight="bold">V = 0.05 m³</text>
+        </svg>`,
+        `<svg width="340" height="160" viewBox="0 0 340 160">
+          <text x="70" y="90" fill="#38bdf8" font-size="28" font-weight="bold">"EUREKA!"</text>
+        </svg>`
+      ]
+    };
+
+    const stanze = {
+      1: { 
+        title: "Stanza 1: Cinematica", word: "MOTO", 
+        ans: ["179.8", "ORIZZONTALE", "32.5", "15.7"], 
+        q: [
+          "Calcola la distanza percorsa (in m) per v = 14.5 m/s e t = 12.4 s (solo numero decimali con punto)?", 
+          "Come si chiama l'asse X nel piano cartesiano?", 
+          "Calcola la velocità (in m/s) di un corpo che percorre 487.5 m in 15 s (solo numero)?", 
+          "Calcola la velocità angolare ω per f = 2.5 Hz con π ≈ 3.14 (ω = 2·π·f) (solo numero)?"
+        ],
+        indizi: [
+          ["Formula: s = v · t", "14.5 x 12.4"],
+          ["Contrario di verticale.", "Inizia con O."],
+          ["Formula: v = s / t", "487.5 / 15"],
+          ["Formula: ω = 2 · 3.14 · 2.5", "Risultato: 15.7"]
+        ]
+      },
+      2: { 
+        title: "Stanza 2: Dinamica", word: "FORZA", 
+        ans: ["80", "12.6", "RISULTANTE", "0", "ATTRITO"], 
+        q: [
+          "Calcola la Forza (N) con m = 12.5 kg e a = 6.4 m/s² (solo numero)?", 
+          "Calcola l'accelerazione (m/s²) prodotta da F = 157.5 N su m = 12.5 kg (solo numero)?", 
+          "Come si chiama la somma vettoriale di tutte le forze applicate?", 
+          "Quanto lavoro (J) compie una forza perpendicolare allo spostamento (solo numero)?", 
+          "Forza che si oppone al movimento tra due superfici a contatto?"
+        ],
+        indizi: [
+          ["Formula: F = m · a", "12.5 x 6.4"],
+          ["Formula: a = F / m", "157.5 / 12.5"],
+          ["Forza unica equivalente.", "Inizia con R."],
+          ["Lavoro nullo con angolo 90°.", "Inserisci 0."],
+          ["Resistenza allo scorrimento.", "Inizia con A."]
+        ]
+      },
+      3: { 
+        title: "Stanza 3: Fluidi & Gravità", word: "ORBITA", 
+        ans: ["ORBITA", "49000", "BAROMETRO", "IMMERSO", "490", "ARCHIMEDE"], 
+        q: [
+          "Traiettoria ellittica di un pianeta attorno al Sole?", 
+          "Calcola la Pressione idrostatica (Pa) a h = 5 m in acqua (d = 1000 kg/m³, g = 9.8 m/s²) (solo numero)?", 
+          "Strumento che misura la pressione atmosferica?", 
+          "Stato del corpo nel fluido per subire la spinta idrostatica?", 
+          "Calcola la Spinta di Archimede (N) per V = 0.05 m³ in acqua (d = 1000 kg/m³, g = 9.8 m/s²) (solo numero)?", 
+          "Famoso matematico che formulò il principio di galleggiamento?"
+        ],
+        indizi: [
+          ["Inizia con O.", "Percorso dei pianeti."],
+          ["Formula Stevino: P = d · g · h", "1000 x 9.8 x 5"],
+          ["Misura la pressione.", "Finisce in -metro."],
+          ["Messo interamente sotto liquido.", "Contrario di emerso."],
+          ["Formula Archimede: F_A = d · V · g", "1000 x 0.05 x 9.8"],
+          ["Disse Eureka!", "Inizia con A."]
+        ]
+      }
+    };
+
+    const sndCorrect = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
+    const sndWrong   = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
+    const bgMusic    = new Audio('https://ia801503.us.archive.org/15/items/wii-party-ost/Wii%20Party%20OST%20-%20Main%20Menu.mp3');
+    bgMusic.loop = true;
+
+    function startGame() {
+      playerName = document.getElementById("player-name-input").value.trim() || "Giocatore";
+      document.getElementById("start-screen").style.display = "none";
+      document.getElementById("game-screen").style.display = "block";
+      bgMusic.volume = 0.3; 
+      bgMusic.play().catch(()=>{});
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      clearInterval(timer);
+      errori = 0;
+      timeLeft = 45;
+      document.getElementById("timer-display").innerText = `Tempo: ${timeLeft}s`;
+      document.getElementById("room-title").innerText = stanze[room].title;
+      document.getElementById("question-text").innerText = stanze[room].q[qIndex];
+      document.getElementById("svg-box").innerHTML = illustrations[room][qIndex];
+      updateWordDisplay();
+      
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer-display").innerText = `Tempo: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          sndWrong.play();
+          alert("Tempo scaduto! Riprova il quesito.");
+          loadQuestion();
+        }
+      }, 1000);
+    }
+
+    function updateWordDisplay() {
+      let display = "";
+      for (let i = 0; i < stanze[room].word.length; i++) {
+        display += (i < qIndex) ? stanze[room].word[i] + " " : "_ ";
+      }
+      document.getElementById("word-progress").innerText = display;
+    }
+
+    function checkAnswer() {
+      const input = document.getElementById("user-answer");
+      const ans = input.value.trim().toUpperCase();
+      if (ans === stanze[room].ans[qIndex]) {
+        sndCorrect.play();
+        input.classList.add("correct-glow");
+        setTimeout(() => input.classList.remove("correct-glow"), 600);
+        qIndex++; score += 200 + timeLeft * 5; input.value = "";
+        
+        if (qIndex === stanze[room].ans.length) {
+          clearInterval(timer);
+          document.getElementById("modal-msg").innerText = `Hai sbloccato la parola '${stanze[room].word}'!`;
+          document.getElementById("room-modal").style.display = "flex";
+          return;
+        }
+        loadQuestion();
+      } else {
+        sndWrong.play(); errori++;
+        input.classList.add("error-shake");
+        setTimeout(() => input.classList.remove("error-shake"), 400);
+
+        if (errori === 3) {
+          alert("💡 Indizio 1: " + stanze[room].indizi[qIndex][0]);
+        } else if (errori === 5) {
+          alert("📐 Indizio 2: " + stanze[room].indizi[qIndex][1]);
+        }
+      }
+    }
+
+    function closeModal() {
+      document.getElementById("room-modal").style.display = "none";
+      room++; qIndex = 0;
+      if (room > 3) { endGame(); return; }
+      loadQuestion();
+    }
+
+    document.getElementById("user-answer").addEventListener("keypress", (e) => { if (e.key === "Enter") checkAnswer(); });
+    function setVol(v) { bgMusic.volume = v; sndCorrect.volume = v; sndWrong.volume = v; }
+    function addCalc(v) { document.getElementById('calc-display').value += v; }
+    function clearCalc() { document.getElementById('calc-display').value = ''; }
+    function evalCalc() { try { document.getElementById('calc-display').value = eval(document.getElementById('calc-display').value); } catch { document.getElementById('calc-display').value = 'Err'; } }
+
+    function endGame() {
+      clearInterval(timer); bgMusic.pause();
+      document.getElementById("game-screen").style.display = "none";
+      document.getElementById("end-screen").style.display = "block";
+      const totalScore = Math.max(0, score - errori * 30);
+      document.getElementById("final-score").innerText = `${playerName}, hai totalizzato: ${totalScore} punti!`;
+      
+      let list = JSON.parse(localStorage.getItem("ranking")) || [];
+      list.push({ name: playerName, pts: totalScore });
+      list.sort((a,b) => b.pts - a.pts);
+      localStorage.setItem("ranking", JSON.stringify(list));
+      document.getElementById("leaderboard").innerHTML = list.map(i => `<li><b>${i.name}</b>: ${i.pts} pt</li>`).join("");
+    }
+  </script>
+</body>
+</html>
